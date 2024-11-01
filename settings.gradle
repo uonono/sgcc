@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+        gradlePluginPortal()
+    }
+}
+rootProject.name = 'sgcc'
+
+include 'sgcc_mgr_eureka'
+include 'sgcc_mgr_auth'
+include 'sgcc_mgr_gateway'
+include 'sgcc_mgr_bx'
