@@ -16,14 +16,15 @@
 
 package com.sgcc.sgcc_mgr_auth;
 
-import com.contest.auth.config.BasicAuthBlockFilter;
-import com.contest.auth.config.CustomGrantedAuthoritiesConverter;
-import com.contest.auth.config.CustomReactiveGrantedAuthoritiesConverter;
-import com.contest.auth.config.CustomReactiveUserDetailsService;
+
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.sgcc.sgcc_mgr_auth.config.BasicAuthBlockFilter;
+import com.sgcc.sgcc_mgr_auth.config.CustomGrantedAuthoritiesConverter;
+import com.sgcc.sgcc_mgr_auth.config.CustomReactiveGrantedAuthoritiesConverter;
+import com.sgcc.sgcc_mgr_auth.config.CustomReactiveUserDetailsService;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;

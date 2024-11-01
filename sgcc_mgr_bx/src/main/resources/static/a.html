@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTTP/2 Test Form with Bearer Token</title>
+</head>
+<body>
+    <h1>HTTP/2 Test Form with Bearer Token</h1>
+    <form id="testForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // 阻止默认表单提交行为
+
+            // 获取表单数据
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // 发送带有 Bearer 令牌的请求
+            fetch('userInfo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJzZWxmIiwic3ViIjoiMSIsImV4cCI6MTcyMzcyODYwNSwiaWF0IjoxNzIzNjkyNjA1LCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwic2NvcGUiOlsiUk9MRV9VU0VSIl19.m41jyRceHgIAjQEv9IAxbMfZzQ0DFH8fjtefLhTIwpFxoF0yIjyxXm6AX6fs6b3_c-2V4TwLAxWLPOYl2GqsQuBDjLxpT802E8wcrBRNkdUfuhblQNn2DA7CJSi462vX_niWum0VdzJqarORBkc3thaZekV7ZI8tvpXagSLIG7hqbHA7a1YVHmC_pPxnSNmiYDXu0wSW5FaKDQr3GpB2Ovi7VtVxOGYh_6AYx8A0hIKT2cxXeNa8RmjO1m99I8TNRua35OoFnovOnnIweGC5jMYAAWOM0PPv4vvaNP0UVCm8XanAw-4YZ9wSHsy_EyzZ0UvqCaPFcVtvINo2TwdSWA' // 替换为实际的 Bearer 令牌
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

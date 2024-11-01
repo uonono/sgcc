@@ -1,0 +1,58 @@
+server:
+  port: 5000
+  ssl: #ssl配置
+    key-store: classpath:mykeystore.jks
+    key-store-type: jks
+    key-store-password: changeit
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]': # 对所有路径生效
+            allowedOrigins: "*"  # 允许所有域
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: "*"  # 允许所有头部
+#            allowCredentials: true  # 允许携带凭证
+      routes:
+#        - id: auth-service
+#          uri: https://localhost:9000   这里应该只能通过内部调用，不能通过网关暴露出去
+#          predicates:
+#            - Path=/auth/**
+#          filters:
+#            - StripPrefix=1
+
+        - id: yh-service
+          uri: https://localhost:8768
+          predicates:
+            - Path=/bx/**
+          filters:
+            - StripPrefix=1
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+#spring:
+#  cloud:
+#    gateway:
+#      mvc:
+#        routes:
+#          - id: auth-service
+#            uri: http://127.0.0.1:9000
+#            predicates:
+#              - Path=/auth/token
+#            filters:
+#              - RewritePath=/auth/token,/token
