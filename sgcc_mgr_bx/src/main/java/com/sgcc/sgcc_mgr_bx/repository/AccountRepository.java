@@ -25,7 +25,7 @@ public interface AccountRepository extends ReactiveCrudRepository<Account, Long>
     @Query("UPDATE account_table SET address = :address, detail_address = :detailAddress, account = :account, " +
             "tag_id = :tagId, latitude = :latitude, longitude = :longitude " +
             "WHERE id = :id AND openid = :openid")
-    Mono<Integer> updateAccountByIdAndOpenid(Long id, String openid, String address, String detailAddress,
+    Mono<Void> updateAccountByIdAndOpenid(Long id, String openid, String address, String detailAddress,
                                              String account, Long tagId, Double latitude, Double longitude);
 
     // 自定义删除方法，根据 openid 和 id 删除账户

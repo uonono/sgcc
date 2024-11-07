@@ -12,5 +12,5 @@ public interface UserInfoRepository extends ReactiveCrudRepository<UserInfo, Lon
     @Query("UPDATE user_info SET nickname = :#{#userInfo.nickname}, headimgurl = :#{#userInfo.headimgurl}, " +
             "phone = :#{#userInfo.phone}, email = :#{#userInfo.email}, address = :#{#userInfo.address}, " +
             "account_number = :#{#userInfo.accountNumber} WHERE openid = :id")
-    Mono<Integer> updateById(String id, UserInfo userInfo);
+    Mono<Void> updateByOpenid(String id, UserInfo userInfo);
 }

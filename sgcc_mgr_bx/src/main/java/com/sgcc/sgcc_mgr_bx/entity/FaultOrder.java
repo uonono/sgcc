@@ -61,20 +61,6 @@ public class FaultOrder {
      * 纬度
      */
     private Double latitude;
-    /**
-     * 勘察时间
-     */
-    private String surveyTime;
-
-    /**
-     * 处理时间
-     */
-    private String dealWithTime;
-
-    /**
-     * 到达时间
-     */
-    private String arriveTime;
 
     /**
      * 当前工单状态，0-4的个位数字

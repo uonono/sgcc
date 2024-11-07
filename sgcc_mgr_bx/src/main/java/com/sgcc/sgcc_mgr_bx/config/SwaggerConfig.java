@@ -7,7 +7,11 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+/** 
+* @Author: cy
+* @Date: 2024/11/7 09:29
+* @Description: 添加統一的鉴权认证
+*/
 @Configuration
 public class SwaggerConfig {
 
@@ -24,4 +28,5 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
     }
+
 }

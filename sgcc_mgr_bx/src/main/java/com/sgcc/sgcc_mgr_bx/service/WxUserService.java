@@ -53,8 +53,8 @@ public class WxUserService {
                         existingUser.setAccountNumber(accountNumber);
                     }
                     // 保存更新后的用户
-                    return userInfoRepository.updateById(existingUser.getOpenid(),existingUser)
-                            .map(AjaxResponse::success); // 返回更新后的用户数据
+                    return userInfoRepository.updateByOpenid(existingUser.getOpenid(),existingUser)
+                            .then(Mono.just(AjaxResponse.success("UserInfo updated successfully"))); // 返回更新后的用户数据
                 })
                 .switchIfEmpty(
                         // 如果用户未找到，则新增当前用户

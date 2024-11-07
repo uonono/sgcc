@@ -132,8 +132,7 @@ public class WxUserAccountService {
         Double longitude = Double.valueOf(data.get("longitude").toString());
 
         return accountRepository.updateAccountByIdAndOpenid(id, openid, address, detailAddress, account, tagId, latitude, longitude)
-                .flatMap(result ->
-                         Mono.just(AjaxResponse.success(result)))
+                .then(Mono.just(AjaxResponse.success("Account updated successfully")))
                 .onErrorResume(e -> Mono.just(AjaxResponse.error("An error occurred: " + e.getMessage())));
     }
 
