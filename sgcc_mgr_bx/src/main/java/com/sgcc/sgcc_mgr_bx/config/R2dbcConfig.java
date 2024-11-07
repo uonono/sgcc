@@ -10,7 +10,6 @@ import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
-
 @Configuration
 public class R2dbcConfig {
 

@@ -47,5 +47,14 @@ public class AjaxResponse {
         return resultBean;
     }
 
+    public static AjaxResponse error(Object data) {
+        AjaxResponse resultBean = new AjaxResponse();
+        resultBean.setIsok(false);
+        resultBean.setCode(200);
+        resultBean.setMessage("error");
+        resultBean.setData(data);
+        return resultBean;
+    }
+
 
 }

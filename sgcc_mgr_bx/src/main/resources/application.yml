@@ -31,7 +31,7 @@ spring:
   application:
     name: oauth2-resource-server-webflux
   r2dbc:
-    url: r2dbc:mysql://47.115.207.202:3306/bs?serverTimezone=Asia/Shanghai
+    url: r2dbc:mysql://free.svipss.top:10941/bx?serverTimezone=Asia/Shanghai
     username: root
     password: Ycs1363707959
 
