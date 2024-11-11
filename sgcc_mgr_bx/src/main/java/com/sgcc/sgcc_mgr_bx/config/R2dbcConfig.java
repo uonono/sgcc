@@ -6,10 +6,12 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.CustomConversions.StoreConversions;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+@EnableTransactionManagement
 @Configuration
 public class R2dbcConfig {
 

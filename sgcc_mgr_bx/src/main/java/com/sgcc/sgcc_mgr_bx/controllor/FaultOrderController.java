@@ -1,11 +1,15 @@
 package com.sgcc.sgcc_mgr_bx.controllor;
 
 import com.github.yitter.idgen.YitIdHelper;
+import com.sgcc.sgcc_mgr_bx.entity.Evaluation;
 import com.sgcc.sgcc_mgr_bx.entity.FaultOrder;
+import com.sgcc.sgcc_mgr_bx.repository.EvaluationRepository;
 import com.sgcc.sgcc_mgr_bx.repository.FaultOrderRepository;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +22,16 @@ public class FaultOrderController {
 
     @Autowired
     private FaultOrderRepository faultOrderRepository;
+
+    @Autowired
+    private EvaluationRepository evaluationRepository;
+
+    @Autowired
+    private DatabaseClient databaseClient;
+
+    @Autowired
+    private TransactionalOperator transactionalOperator;
+
 
     /**
      * 接收并保存故障订单信息
@@ -90,4 +104,48 @@ public class FaultOrderController {
                 .then(Mono.just(AjaxResponse.success("工单已成功取消")))
                 .onErrorResume(e -> Mono.just(AjaxResponse.error("取消工单失败: " + e.getMessage())));
     }
+
+    /**
+     * 保存工单评价
+     *
+     * @param authentication 是我的单才能评价  openid
+     * @param request        评价内容
+     * @return 评价成功与否
+     */
+    @PostMapping("/evaluate/create")
+    public Mono<AjaxResponse> createEvaluation(@RequestBody Map<String, Object> request, Authentication authentication) {
+        String openid = authentication.getName();
+
+        Long orderId = Long.valueOf(request.get("orderId").toString());
+        Integer attitudeScore = Integer.valueOf(request.get("attitudeScore").toString());
+        Integer timelyScore = Integer.valueOf(request.get("timelyScore").toString());
+        String content = request.get("content").toString();
+
+        return evaluationRepository.canEvaluate(openid, orderId)
+                .flatMap(statusModel -> {
+                    if (statusModel != null && statusModel.getStatus() == 1) { // 1 表示可以评价
+                        Evaluation evaluation = new Evaluation();
+                        evaluation.setId(YitIdHelper.nextId());
+                        evaluation.setFaultOrderId(orderId);
+                        evaluation.setServiceAttitude(attitudeScore);
+                        evaluation.setRepairTimeliness(timelyScore);
+                        evaluation.setComments(content);
+                        evaluation.setCreatedAt(LocalDateTime.now());
+
+                        // 在事务中同时执行保存评价和更新操作
+                        return transactionalOperator.transactional(
+                                evaluationRepository.save(evaluation)
+                                        .then(databaseClient.sql("UPDATE fault_order SET proc_code = 7 WHERE id = ?")
+                                                .bind(0, orderId)
+                                                .then())
+                        ).thenReturn(AjaxResponse.success("评价成功"));
+                    } else {
+                        return Mono.just(AjaxResponse.error("工单已评价或无权限评价该工单"));
+                    }
+                })
+                .onErrorResume(e -> Mono.just(AjaxResponse.error("系统异常，请联系管理员: " + e.getMessage())));
+    }
+
+
+
 }

@@ -35,4 +35,6 @@ public interface FaultOrderRepository extends ReactiveCrudRepository<FaultOrder,
      */
     @Query("DELETE FROM fault_order WHERE openid = :openid AND id = :id")
     Mono<Void> deleteByOpenidAndId(String openid, Long id);
+
+
 }
