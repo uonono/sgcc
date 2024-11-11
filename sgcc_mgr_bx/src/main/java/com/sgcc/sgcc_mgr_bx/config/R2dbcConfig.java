@@ -15,16 +15,27 @@ public class R2dbcConfig {
 
     @Bean
     public R2dbcCustomConversions r2dbcCustomConversions() {
-        StoreConversions storeConversions = R2dbcCustomConversions.STORE_CONVERSIONS;
-        List<Converter<?, ?>> converters = Arrays.asList(new ByteToBooleanConverter());
-        return new R2dbcCustomConversions(storeConversions, converters);
+        List<Converter<?, ?>> converters = Arrays.asList(
+                new ByteToBooleanConverter(),
+                new ByteBufferToBooleanConverter()
+        );
+        return new R2dbcCustomConversions(StoreConversions.NONE, converters);
     }
 
+    // Byte 到 Boolean 的转换器
     @ReadingConverter
-    public static class ByteToBooleanConverter implements Converter<ByteBuffer, Boolean> {
+    public static class ByteToBooleanConverter implements Converter<Byte, Boolean> {
+        @Override
+        public Boolean convert(Byte source) {
+            return source != null && source == 1;
+        }
+    }
+
+    // ByteBuffer 到 Boolean 的转换器
+    @ReadingConverter
+    public static class ByteBufferToBooleanConverter implements Converter<ByteBuffer, Boolean> {
         @Override
         public Boolean convert(ByteBuffer source) {
-            // 自定义转换逻辑，这里假设 1 是 true，0 是 false
             return source.get(0) == 1;
         }
     }

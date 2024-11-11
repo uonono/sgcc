@@ -63,7 +63,7 @@ public class FaultOrder {
     private Double latitude;
 
     /**
-     * 当前工单状态，0-4的个位数字
+     * 当前工单状态，0-8的个位数字
      */
     private Integer procCode;
 }
