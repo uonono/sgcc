@@ -11,6 +11,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -130,7 +131,6 @@ public class FaultOrderController {
                         evaluation.setServiceAttitude(attitudeScore);
                         evaluation.setRepairTimeliness(timelyScore);
                         evaluation.setComments(content);
-                        evaluation.setCreatedAt(LocalDateTime.now());
 
                         // 在事务中同时执行保存评价和更新操作
                         return transactionalOperator.transactional(
@@ -146,6 +146,37 @@ public class FaultOrderController {
                 .onErrorResume(e -> Mono.just(AjaxResponse.error("系统异常，请联系管理员: " + e.getMessage())));
     }
 
+    /**
+     * 根据id查询评价接口
+     * @param id 评价id
+     * @param authentication openid
+     * @return id的评价信息
+     */
+    @GetMapping("evaluate/get/item/{id}")
+    public Mono<AjaxResponse> getEvaluationByIdAndOpenid(@PathVariable String id, Authentication authentication) {
+        String openid = authentication.getName();
+        return evaluationRepository.findByIdAndOpenid(id, openid)
+                .map(AjaxResponse::success)
+                .defaultIfEmpty(AjaxResponse.error("Evaluation not found"));
+    }
 
+    /**
+     * 获取历史报修记录
+     * @param authentication openid
+     * @return 历史报修记录信息
+     */
+    @GetMapping("addressHistory/list")
+    public Mono<AjaxResponse> getAddressHistoryList(Authentication authentication) {
+        String openid = authentication.getName();
+        return faultOrderRepository.findByProcCodeAndOpenid(7, openid)
+                .collectList()  // 将 Flux 转换为 Mono<List<FaultOrder>>
+                .map(faultOrders -> {
+                    if (faultOrders.isEmpty()) {
+                        return AjaxResponse.error("AddressHistory not found");
+                    } else {
+                        return AjaxResponse.success(faultOrders);
+                    }
+                });
+    }
 
 }

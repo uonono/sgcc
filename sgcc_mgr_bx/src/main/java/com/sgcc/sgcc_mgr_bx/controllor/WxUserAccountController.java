@@ -64,7 +64,9 @@ public class WxUserAccountController {
      */
     @PostMapping("/update")
     public Mono<AjaxResponse> updateAccount(Authentication authentication, @RequestBody Map<String, Object> data) {
-        return wxUserAccountService.updateAccount(authentication, data);
+        return wxUserAccountService.updateAccount(authentication, data)
+                .then(Mono.just(AjaxResponse.success("Account updated successfully")))
+                .onErrorResume(e -> Mono.just(AjaxResponse.error("An error occurred: " + e.getMessage())));
     }
 
     /**

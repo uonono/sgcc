@@ -9,8 +9,12 @@ import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.nio.ByteBuffer;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+
 @EnableTransactionManagement
 @Configuration
 public class R2dbcConfig {
@@ -19,7 +23,8 @@ public class R2dbcConfig {
     public R2dbcCustomConversions r2dbcCustomConversions() {
         List<Converter<?, ?>> converters = Arrays.asList(
                 new ByteToBooleanConverter(),
-                new ByteBufferToBooleanConverter()
+                new ByteBufferToBooleanConverter(),
+                new ZonedDateTimeToTimestampConverter() // 添加 ZonedDateTime 到 Timestamp 的转换器
         );
         return new R2dbcCustomConversions(StoreConversions.NONE, converters);
     }
@@ -39,6 +44,15 @@ public class R2dbcConfig {
         @Override
         public Boolean convert(ByteBuffer source) {
             return source.get(0) == 1;
+        }
+    }
+
+    // ZonedDateTime 到 Timestamp 的转换器
+    @ReadingConverter
+    public static class ZonedDateTimeToTimestampConverter implements Converter<ZonedDateTime, Timestamp> {
+        @Override
+        public Timestamp convert(ZonedDateTime source) {
+            return source != null ? Timestamp.from(source.toInstant()) : null;
         }
     }
 }

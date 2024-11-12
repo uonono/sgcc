@@ -7,10 +7,13 @@ import com.sgcc.sgcc_mgr_bx.repository.AccountRepository;
 import com.sgcc.sgcc_mgr_bx.repository.TagRepository;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -21,6 +24,9 @@ public class WxUserAccountService {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private DatabaseClient databaseClient;
 
     /**
      * 创建新的账户记录
@@ -120,10 +126,20 @@ public class WxUserAccountService {
      * @param data JSON 对象，包含需要更新的字段
      * @return 操作结果
      */
-    public Mono<AjaxResponse> updateAccount(Authentication authentication, Map<String, Object> data) {
+    public Mono<Void> updateAccount(Authentication authentication, Map<String, Object> data) {
         String openid = authentication.getName();
 
-        Long id = Long.valueOf((String) data.get("id"));
+        Object idObject = data.get("id");
+        long id;
+
+        if (idObject instanceof Long) {
+            id = (Long) idObject;
+        } else if (idObject instanceof String) {
+            id = Long.parseLong((String) idObject);
+        } else {
+            throw new IllegalArgumentException("Invalid id type");
+        }
+
         String address = (String) data.get("address");
         String detailAddress = (String) data.get("detailAddress");
         String account = (String) data.get("account");
@@ -131,9 +147,55 @@ public class WxUserAccountService {
         Double latitude = Double.valueOf(data.get("latitude").toString());
         Double longitude = Double.valueOf(data.get("longitude").toString());
 
-        return accountRepository.updateAccountByIdAndOpenid(id, openid, address, detailAddress, account, tagId, latitude, longitude)
-                .then(Mono.just(AjaxResponse.success("Account updated successfully")))
-                .onErrorResume(e -> Mono.just(AjaxResponse.error("An error occurred: " + e.getMessage())));
+        StringBuilder sql = new StringBuilder("UPDATE account_table SET ");
+        List<Object> parameters = new ArrayList<>();
+
+        if (address != null) {
+            sql.append("address = ?, ");
+            parameters.add(address);
+        }
+        if (detailAddress != null) {
+            sql.append("detail_address = ?, ");
+            parameters.add(detailAddress);
+        }
+        if (account != null) {
+            sql.append("account = ?, ");
+            parameters.add(account);
+        }
+        if (data.get("tagId") != null) {
+            sql.append("tag_id = ?, ");
+            parameters.add(tagId);
+        }
+        if (data.get("latitude") != null) {
+            sql.append("latitude = ?, ");
+            parameters.add(latitude);
+        }
+        if (data.get("longitude") != null) {
+            sql.append("longitude = ?, ");
+            parameters.add(longitude);
+        }
+
+        // Remove the last comma and space
+        if (!parameters.isEmpty()) {
+            sql.setLength(sql.length() - 2);
+        } else {
+            return Mono.empty(); // No fields to update
+        }
+
+        sql.append(" WHERE id = ? AND openid = ?");
+        parameters.add(id);
+        parameters.add(openid);
+        String sqlString = sql.toString();
+        System.out.println(sqlString);
+        // 使用 DatabaseClient 执行动态 SQL
+        DatabaseClient.GenericExecuteSpec spec = databaseClient.sql(sqlString);
+        for (int i = 0; i < parameters.size(); i++) {
+            spec = spec.bind(i, parameters.get(i));
+        }
+        return spec.then();
+//        return accountRepository.updateAccountByIdAndOpenid(id, openid, address, detailAddress, account, tagId, latitude, longitude)
+//                .then(Mono.just(AjaxResponse.success("Account updated successfully")))
+//                .onErrorResume(e -> Mono.just(AjaxResponse.error("An error occurred: " + e.getMessage())));
     }
 
     /**

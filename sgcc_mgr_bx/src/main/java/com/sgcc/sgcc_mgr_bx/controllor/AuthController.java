@@ -7,10 +7,9 @@ import com.sgcc.sgcc_mgr_bx.exception.CustomExceptionType;
 import com.sgcc.sgcc_mgr_bx.model.AccessTokenResponse;
 import com.sgcc.sgcc_mgr_bx.model.AuthorizedLoginResponse;
 import com.sgcc.sgcc_mgr_bx.model.UserInfoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -55,12 +54,14 @@ public class AuthController {
         }
     }
 
-
     /**
      * 开放的登录接口
+     *
      * @param requestBody 接收的code授权码
      * @return 用户的个人信息
      */
+//    @Parameter(name = "requestBody",description = "requestBody",in = ParameterIn.COOKIE,example = "{authCode:authCode}")
+    @Operation(summary = "Authentication Login", description = "Authenticates user login with auth code")
     @PostMapping("/authLogin")
     public Mono<AjaxResponse> authLogin(@RequestBody(required = false) Map<String, String> requestBody) {
         if (requestBody == null || !requestBody.containsKey("authCode")) {

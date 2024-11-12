@@ -19,4 +19,9 @@ public interface EvaluationRepository extends ReactiveCrudRepository<Evaluation,
     """)
     Mono<StatusModel> canEvaluate(String openid, Long orderId);
 
+    @Query("SELECT e.* FROM evaluation e " +
+            "JOIN fault_order f ON e.fault_order_id = f.id " +
+            "WHERE f.id = :id AND f.openid = :openid")
+    Mono<Evaluation> findByIdAndOpenid(String id, String openid);
+
 }

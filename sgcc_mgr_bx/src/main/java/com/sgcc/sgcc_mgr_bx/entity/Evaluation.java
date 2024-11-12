@@ -3,6 +3,8 @@ package com.sgcc.sgcc_mgr_bx.entity;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Data
@@ -41,5 +43,5 @@ public class Evaluation {
      * 评价创建时间
      * 记录评价的创建时间，用于表示评价的时间点
      */
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 }

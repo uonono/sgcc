@@ -11,9 +11,9 @@ public interface FaultOrderRepository extends ReactiveCrudRepository<FaultOrder,
 
     // 自定义查询方法，根据 openid 和 id 查询 FaultOrderWithNickname
     @Query("""
-        SELECT fo.*, ui.nickname AS worker_name , ui.phone AS worker_phone FROM fault_order fo
-        JOIN repair_record rr ON fo.id = rr.fault_order_id
-        JOIN user_info ui ON ui.openid = rr.repair_user_openid
+        SELECT fo.*, ui.nickname AS worker_name, ui.phone AS worker_phone FROM fault_order fo
+        LEFT JOIN repair_record rr ON fo.id = rr.fault_order_id
+        LEFT JOIN user_info ui ON ui.openid = rr.repair_user_openid
         WHERE fo.openid = :openid AND fo.id = :id
     """)
     Mono<FaultOrderWithNickname> findByOpenidAndId(String openid, Long id);
@@ -36,5 +36,8 @@ public interface FaultOrderRepository extends ReactiveCrudRepository<FaultOrder,
     @Query("DELETE FROM fault_order WHERE openid = :openid AND id = :id")
     Mono<Void> deleteByOpenidAndId(String openid, Long id);
 
+
+    @Query("SELECT * FROM fault_order WHERE proc_code = :procCode AND openid = :openid")
+    Flux<FaultOrder> findByProcCodeAndOpenid(int procCode, String openid);
 
 }
