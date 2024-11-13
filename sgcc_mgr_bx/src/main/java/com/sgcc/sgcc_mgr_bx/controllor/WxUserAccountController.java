@@ -1,6 +1,7 @@
 package com.sgcc.sgcc_mgr_bx.controllor;
 
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
+import com.sgcc.sgcc_mgr_bx.model.UpdateAccountRequest;
 import com.sgcc.sgcc_mgr_bx.service.WxUserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ public class WxUserAccountController {
      * @return 保存后的账户信息
      */
     @PostMapping("/create")
-    public Mono<AjaxResponse> create(Authentication authentication, @RequestBody Map<String, Object> data) {
+    public Mono<AjaxResponse> create(Authentication authentication, @RequestBody UpdateAccountRequest data) {
         return wxUserAccountService.createAccount(authentication, data);
     }
 
@@ -63,7 +64,7 @@ public class WxUserAccountController {
      * @return 操作结果
      */
     @PostMapping("/update")
-    public Mono<AjaxResponse> updateAccount(Authentication authentication, @RequestBody Map<String, Object> data) {
+    public Mono<AjaxResponse> updateAccount(Authentication authentication, @RequestBody UpdateAccountRequest data) {
         return wxUserAccountService.updateAccount(authentication, data)
                 .then(Mono.just(AjaxResponse.success("Account updated successfully")))
                 .onErrorResume(e -> Mono.just(AjaxResponse.error("An error occurred: " + e.getMessage())));

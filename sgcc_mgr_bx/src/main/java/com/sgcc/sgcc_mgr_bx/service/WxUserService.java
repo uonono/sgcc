@@ -4,6 +4,7 @@ import com.sgcc.sgcc_mgr_bx.entity.UserInfo;
 import com.sgcc.sgcc_mgr_bx.repository.UserInfoRepository;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -23,14 +24,17 @@ public class WxUserService {
      * @param userInfo 用户信息
      * @return Mono<AjaxResponse>
      */
-    public Mono<AjaxResponse> updateOrCreateUser(String openid, Map<String, String> userInfo) {
-        String unionid = userInfo.get("unionid");
-        String headimgurl = userInfo.get("headimgurl");
-        String nickname = userInfo.get("nickname");
-        String phone = userInfo.get("phone");
-        String email = userInfo.get("email");
-        String address = userInfo.get("address");
-        String accountNumber = userInfo.get("accountNumber");
+    public Mono<AjaxResponse> updateOrCreateUser(String openid, @RequestBody UserInfo userInfo) {
+        // 获取字段值
+        String unionid = userInfo.getUnionid();
+        String headimgurl = userInfo.getHeadimgurl();
+        String nickname = userInfo.getNickname();
+        String phone = userInfo.getPhone();
+        String email = userInfo.getEmail();
+        String address = userInfo.getAddress();
+        String accountNumber = userInfo.getAccountNumber();
+
+        // 处理更新或创建用户的业务逻辑
         return userInfoRepository.findByOpenid(openid)  // 根据 openid 查找用户
                 .flatMap(existingUser -> {
                     // 如果找到该用户，更新用户信息，只有字段不为空时才进行更新

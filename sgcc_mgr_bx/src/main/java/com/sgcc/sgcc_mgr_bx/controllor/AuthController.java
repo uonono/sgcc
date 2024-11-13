@@ -5,6 +5,7 @@ import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import com.sgcc.sgcc_mgr_bx.exception.CustomException;
 import com.sgcc.sgcc_mgr_bx.exception.CustomExceptionType;
 import com.sgcc.sgcc_mgr_bx.model.AccessTokenResponse;
+import com.sgcc.sgcc_mgr_bx.model.AuthLoginRequest;
 import com.sgcc.sgcc_mgr_bx.model.AuthorizedLoginResponse;
 import com.sgcc.sgcc_mgr_bx.model.UserInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,21 +58,22 @@ public class AuthController {
     /**
      * 开放的登录接口
      *
-     * @param requestBody 接收的code授权码
+     * @param request 接收的code授权码
      * @return 用户的个人信息
      */
 //    @Parameter(name = "requestBody",description = "requestBody",in = ParameterIn.COOKIE,example = "{authCode:authCode}")
     @Operation(summary = "Authentication Login", description = "Authenticates user login with auth code")
     @PostMapping("/authLogin")
-    public Mono<AjaxResponse> authLogin(@RequestBody(required = false) Map<String, String> requestBody) {
-        if (requestBody == null || !requestBody.containsKey("authCode")) {
-            return Mono.just(AjaxResponse.error(new CustomException(CustomExceptionType.REQUEST_PARAMETER_ERROR, "Request body is empty or missing code")));
+    public Mono<AjaxResponse> authLogin(@RequestBody(required = false) AuthLoginRequest request) {
+        if (request == null || request.getAuthCode() == null || request.getAuthCode().isEmpty()) {
+            return Mono.just(AjaxResponse.error(new CustomException(CustomExceptionType.REQUEST_PARAMETER_ERROR, "Request body is empty or missing authCode")));
         }
+
         // 获取 code 参数
-        String code = requestBody.get("authCode");
+        String code = request.getAuthCode();
 
         // 验证 code
-        if (code == null || code.matches("^[a-zA-Z]+$") || code.matches("^[0-9]+$")) {
+        if (code.matches("^[a-zA-Z]+$") || code.matches("^[0-9]+$")) {
             return Mono.just(AjaxResponse.error(new CustomException(CustomExceptionType.REQUEST_PARAMETER_ERROR, "Invalid code format")));
         }
         return webClient.get()

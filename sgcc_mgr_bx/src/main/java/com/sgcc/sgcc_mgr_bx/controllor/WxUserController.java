@@ -4,6 +4,7 @@ import com.github.yitter.idgen.YitIdHelper;
 import com.sgcc.sgcc_mgr_bx.entity.Tag;
 import com.sgcc.sgcc_mgr_bx.entity.UserInfo;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
+import com.sgcc.sgcc_mgr_bx.model.TagCreateRequest;
 import com.sgcc.sgcc_mgr_bx.repository.TagRepository;
 import com.sgcc.sgcc_mgr_bx.repository.UserInfoRepository;
 import com.sgcc.sgcc_mgr_bx.service.WxUserService;
@@ -48,7 +49,7 @@ public class WxUserController {
      * @return 更新后的用户信息或者错误信息
      */
     @PostMapping("/updateWxUser")
-    public Mono<AjaxResponse> updateWxUser(Authentication authentication, @RequestBody(required = false) Map<String, String> userInfo) {
+    public Mono<AjaxResponse> updateWxUser(Authentication authentication, @RequestBody UserInfo userInfo) {
         // 获取当前用户的 openid
         String openid = authentication.getName();  // JWT 中存储的 openid
         // 调用服务层的方法，传递 openid 和 userInfo 进行更新或新增
@@ -58,18 +59,21 @@ public class WxUserController {
 
     /**
      * 创建标签
-     * @param data 包含 tagName 的 JSON 数据
+     * @param request 包含 tagName 的 JSON 数据
      * @param authentication 认证的openid
      * @return 保存后的标签信息
      */
     @PostMapping("/tag/create")
-    public Mono<AjaxResponse> tagCreate(Authentication authentication, @RequestBody Map<String, String> data) {
-        String tagName = data.get("tagName");
+    public Mono<AjaxResponse> tagCreate(Authentication authentication, @RequestBody TagCreateRequest request) {
+        // 获取标签名称
+        String tagName = request.getTagName();
+
         // 创建标签对象并设置标签名
         Tag tag = new Tag();
         tag.setOpenid(authentication.getName());
         tag.setTagName(tagName);
         tag.setId(YitIdHelper.nextId());
+
         // 保存标签到数据库
         return tagRepository.save(tag)
                 .map(AjaxResponse::success)

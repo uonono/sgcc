@@ -3,10 +3,13 @@ package com.sgcc.sgcc_mgr_bx.controllor;
 import com.github.yitter.idgen.YitIdHelper;
 import com.sgcc.sgcc_mgr_bx.entity.Evaluation;
 import com.sgcc.sgcc_mgr_bx.entity.FaultOrder;
+import com.sgcc.sgcc_mgr_bx.model.EvaluationRequest;
+import com.sgcc.sgcc_mgr_bx.model.WorkerLocation;
 import com.sgcc.sgcc_mgr_bx.repository.EvaluationRepository;
 import com.sgcc.sgcc_mgr_bx.repository.FaultOrderRepository;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -33,30 +36,36 @@ public class FaultOrderController {
     @Autowired
     private TransactionalOperator transactionalOperator;
 
+    @Autowired
+    private ReactiveRedisTemplate<String, WorkerLocation> reactiveRedisTemplate;
 
     /**
      * 接收并保存故障订单信息
      *
      * @param authentication openid
-     * @param data           包含故障订单信息的 JSON 数据
+     * @param request           包含故障订单信息的 JSON 数据
      * @return 保存操作的结果
      */
     @PostMapping("/save")
-    public Mono<AjaxResponse> faultOrder(Authentication authentication, @RequestBody Map<String, Object> data) {
+    public Mono<AjaxResponse> faultOrder(Authentication authentication, @RequestBody FaultOrder request) {
         FaultOrder faultOrder = new FaultOrder();
+
         // 将请求数据解析并赋值给 FaultOrder 实体
-        faultOrder.setAddressAreaName((String) data.get("addressAreaName"));
-        faultOrder.setAddress((String) data.get("address"));
-        faultOrder.setAccount((String) data.get("account"));
-        faultOrder.setContactName((String) data.get("contactName"));
-        faultOrder.setContactPhone((String) data.get("contactPhone"));
-        faultOrder.setContent((String) data.get("content"));
-        faultOrder.setOrderTime((String) data.get("orderTime"));
-        faultOrder.setLongitude(Double.valueOf(data.get("longitude").toString()));
-        faultOrder.setLatitude(Double.valueOf(data.get("latitude").toString()));
+        faultOrder.setAddressAreaName(request.getAddressAreaName());
+        faultOrder.setAddress(request.getAddress());
+        faultOrder.setAccount(request.getAccount());
+        faultOrder.setContactName(request.getContactName());
+        faultOrder.setContactPhone(request.getContactPhone());
+        faultOrder.setContent(request.getContent());
+        faultOrder.setOrderTime(request.getOrderTime());
+        faultOrder.setLongitude(request.getLongitude());
+        faultOrder.setLatitude(request.getLatitude());
         faultOrder.setId(YitIdHelper.nextId());
         faultOrder.setOpenid(authentication.getName());
         faultOrder.setProcCode(0);
+
+        // 处理故障订单的业务逻辑
+        // ...
         // 保存到数据库并返回结果
         return faultOrderRepository.save(faultOrder)
                 .map(AjaxResponse::success)
@@ -114,14 +123,17 @@ public class FaultOrderController {
      * @return 评价成功与否
      */
     @PostMapping("/evaluate/create")
-    public Mono<AjaxResponse> createEvaluation(@RequestBody Map<String, Object> request, Authentication authentication) {
+    public Mono<AjaxResponse> createEvaluation(@RequestBody EvaluationRequest request, Authentication authentication) {
         String openid = authentication.getName();
 
-        Long orderId = Long.valueOf(request.get("orderId").toString());
-        Integer attitudeScore = Integer.valueOf(request.get("attitudeScore").toString());
-        Integer timelyScore = Integer.valueOf(request.get("timelyScore").toString());
-        String content = request.get("content").toString();
+        // 获取请求数据
+        Long orderId = request.getOrderId();
+        Integer attitudeScore = request.getAttitudeScore();
+        Integer timelyScore = request.getTimelyScore();
+        String content = request.getContent();
 
+        // 处理评价创建的业务逻辑
+        // ...
         return evaluationRepository.canEvaluate(openid, orderId)
                 .flatMap(statusModel -> {
                     if (statusModel != null && statusModel.getStatus() == 1) { // 1 表示可以评价
@@ -177,6 +189,44 @@ public class FaultOrderController {
                         return AjaxResponse.success(faultOrders);
                     }
                 });
+    }
+
+    /**
+     * 获取抢修人员位置 获取 WorkerLocation，封装成 AjaxResponse
+     * @param id 工单id
+     * @return 抢修人员当前位置
+     */
+    @GetMapping("/worker/location/{id}")
+    public Mono<AjaxResponse> getWorkerLocation(@PathVariable String id) {
+        // 假设 Redis 存储的键是工人的 id，例如：worker:location:{id}
+        String redisKey = "worker:location:" + id;
+        return reactiveRedisTemplate.opsForValue().get(redisKey)
+                .flatMap(workerLocation -> {
+                    // 如果找到工人的位置，返回成功的响应
+                    return Mono.just(AjaxResponse.success(workerLocation));
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    // 如果未找到工人的位置，返回错误的响应
+                    return Mono.just(AjaxResponse.error("Worker location not found"));
+                }));
+    }
+
+    /**
+     * 使用 ReactiveRedisTemplate 插入两个测试数据
+     * @return 插入成功与否
+     */
+    @GetMapping("/worker/insert/test")
+    public Mono<Void> insertTestData() {
+        WorkerLocation worker1 = new WorkerLocation(39.9042, 116.4074);  // 北京位置
+        WorkerLocation worker2 = new WorkerLocation(31.2304, 121.4737);  // 上海位置
+
+        // 将数据存入 Redis，假设 ID 为 worker1 和 worker2
+        return Mono.zip(
+//                reactiveRedisTemplate.opsForHash().put("worker:location", "611391076756933", worker1),
+//                reactiveRedisTemplate.opsForHash().put("worker:location", "611391076756933", worker2)
+                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", worker1),
+                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", worker2)
+        ).then();
     }
 
 }

@@ -4,6 +4,7 @@ import com.sgcc.sgcc_mgr_bx.entity.RepairRecord;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
 import com.sgcc.sgcc_mgr_bx.repository.RepairRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -26,8 +27,8 @@ public class RepairRecordController {
      * @return 封装的AjaxResponse对象
      */
     @GetMapping("/get/{id}")
-    public Mono<AjaxResponse> getRepairRecordByFaultOrderId(@PathVariable("id") Long faultOrderId) {
-        return repairRecordRepository.findByFaultOrderId(faultOrderId)
+    public Mono<AjaxResponse> getRepairRecordByFaultOrderId(Authentication authentication, @PathVariable("id") Long faultOrderId) {
+        return repairRecordRepository.findByFaultOrderId(faultOrderId,authentication.getName())
                 .map(AjaxResponse::success) // 如果找到记录，封装成功响应
                 .defaultIfEmpty(AjaxResponse.error("No repair record found for the given faultOrderId")); // 如果没有找到记录，返回错误响应
     }

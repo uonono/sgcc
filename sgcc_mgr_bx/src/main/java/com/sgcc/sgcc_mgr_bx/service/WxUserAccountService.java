@@ -3,6 +3,7 @@ package com.sgcc.sgcc_mgr_bx.service;
 import com.github.yitter.idgen.YitIdHelper;
 import com.sgcc.sgcc_mgr_bx.entity.Account;
 import com.sgcc.sgcc_mgr_bx.model.AccountModel;
+import com.sgcc.sgcc_mgr_bx.model.UpdateAccountRequest;
 import com.sgcc.sgcc_mgr_bx.repository.AccountRepository;
 import com.sgcc.sgcc_mgr_bx.repository.TagRepository;
 import com.sgcc.sgcc_mgr_bx.exception.AjaxResponse;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -30,17 +32,18 @@ public class WxUserAccountService {
 
     /**
      * 创建新的账户记录
-     * @param data 包含账户信息的 JSON 数据
+     * @param request 包含账户信息的 JSON 数据
      * @param authentication 用于获取当前用户的 openid
      * @return 保存后的账户信息
      */
-    public Mono<AjaxResponse> createAccount(Authentication authentication, Map<String, Object> data) {
-        String detailAddress = (String) data.get("detailAddress");
-        String address = (String) data.get("address");
-        String account = (String) data.get("account");
-        Long tagId = Long.valueOf(data.get("tagId").toString());
-        Double latitude = Double.valueOf(data.get("latitude").toString());
-        Double longitude = Double.valueOf(data.get("longitude").toString());
+    public Mono<AjaxResponse> createAccount(Authentication authentication, @RequestBody UpdateAccountRequest request) {
+        // 获取字段值
+        String detailAddress = request.getDetailAddress();
+        String address = request.getAddress();
+        String account = request.getAccount();
+        Long tagId = request.getTagId();
+        Double latitude = request.getLatitude();
+        Double longitude = request.getLongitude();
 
         Account accountEntity = new Account();
         accountEntity.setDetailAddress(detailAddress);
@@ -123,29 +126,21 @@ public class WxUserAccountService {
      * 更新账户信息接口
      *
      * @param authentication 用户认证信息
-     * @param data JSON 对象，包含需要更新的字段
+     * @param request JSON 对象，包含需要更新的字段
      * @return 操作结果
      */
-    public Mono<Void> updateAccount(Authentication authentication, Map<String, Object> data) {
+    public Mono<Void> updateAccount(Authentication authentication, @RequestBody UpdateAccountRequest request) {
         String openid = authentication.getName();
 
-        Object idObject = data.get("id");
-        long id;
+        // 其它字段
+        String address = request.getAddress();
+        String detailAddress = request.getDetailAddress();
+        String account = request.getAccount();
+        Long tagId = request.getTagId();
+        Double latitude = request.getLatitude();
+        Double longitude = request.getLongitude();
 
-        if (idObject instanceof Long) {
-            id = (Long) idObject;
-        } else if (idObject instanceof String) {
-            id = Long.parseLong((String) idObject);
-        } else {
-            throw new IllegalArgumentException("Invalid id type");
-        }
-
-        String address = (String) data.get("address");
-        String detailAddress = (String) data.get("detailAddress");
-        String account = (String) data.get("account");
-        Long tagId = Long.valueOf(data.get("tagId").toString());
-        Double latitude = Double.valueOf(data.get("latitude").toString());
-        Double longitude = Double.valueOf(data.get("longitude").toString());
+        long id = request.getId() ;
 
         StringBuilder sql = new StringBuilder("UPDATE account_table SET ");
         List<Object> parameters = new ArrayList<>();
@@ -162,15 +157,15 @@ public class WxUserAccountService {
             sql.append("account = ?, ");
             parameters.add(account);
         }
-        if (data.get("tagId") != null) {
+        if (tagId != null) {
             sql.append("tag_id = ?, ");
             parameters.add(tagId);
         }
-        if (data.get("latitude") != null) {
+        if (latitude != null) {
             sql.append("latitude = ?, ");
             parameters.add(latitude);
         }
-        if (data.get("longitude") != null) {
+        if (longitude != null) {
             sql.append("longitude = ?, ");
             parameters.add(longitude);
         }
