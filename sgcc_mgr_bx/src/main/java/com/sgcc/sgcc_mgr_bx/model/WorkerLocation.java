@@ -1,7 +1,10 @@
 package com.sgcc.sgcc_mgr_bx.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 
 /**
 * @Author: cy
@@ -10,6 +13,7 @@ import lombok.NoArgsConstructor;
 */
 @NoArgsConstructor
 @Data
+@AllArgsConstructor
 public class WorkerLocation {
 
     /**
@@ -22,9 +26,8 @@ public class WorkerLocation {
      */
     private Double longitude;
 
-    // 构造方法
-    public WorkerLocation(Double latitude, Double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
+    /**
+     * 提交时间
+     */
+    private Timestamp submitTime;
 }

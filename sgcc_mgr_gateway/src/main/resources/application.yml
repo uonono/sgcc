@@ -35,10 +35,17 @@ spring:
 #          filters:
 #            - StripPrefix=1
 
-        - id: yh-service
+        - id: bx-service
           uri: https://localhost:8768
           predicates:
             - Path=/bx/**
+          filters:
+            - StripPrefix=1
+
+        - id: qx-service
+          uri: https://localhost:8769
+          predicates:
+            - Path=/qx/**
           filters:
             - StripPrefix=1
 

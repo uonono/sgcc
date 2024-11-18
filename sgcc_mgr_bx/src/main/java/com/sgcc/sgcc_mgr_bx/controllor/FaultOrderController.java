@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,7 +41,7 @@ public class FaultOrderController {
     private TransactionalOperator transactionalOperator;
 
     @Autowired
-    private ReactiveRedisTemplate<String, WorkerLocation> reactiveRedisTemplate;
+    private ReactiveRedisTemplate<String, List<WorkerLocation>> reactiveRedisTemplate;
 
     /**
      * 接收并保存故障订单信息
@@ -217,15 +221,25 @@ public class FaultOrderController {
      */
     @GetMapping("/worker/insert/test")
     public Mono<Void> insertTestData() {
-        WorkerLocation worker1 = new WorkerLocation(39.9042, 116.4074);  // 北京位置
-        WorkerLocation worker2 = new WorkerLocation(31.2304, 121.4737);  // 上海位置
+        // 替换后的 WorkerLocation 对象
+        WorkerLocation worker1 = new WorkerLocation(23.18139, 113.48067, Timestamp.valueOf(LocalDateTime.now())); // 目标点
+        WorkerLocation worker2 = new WorkerLocation(23.151158333333334, 113.40055833333334, Timestamp.valueOf(LocalDateTime.now()));
+        WorkerLocation worker3 = new WorkerLocation(23.120926666666667, 113.32044666666667, Timestamp.valueOf(LocalDateTime.now()));
+        WorkerLocation worker4 = new WorkerLocation(23.090695, 113.240335, Timestamp.valueOf(LocalDateTime.now()));
+        WorkerLocation worker5 = new WorkerLocation(23.060463333333336, 113.16022333333334, Timestamp.valueOf(LocalDateTime.now()));
+        WorkerLocation worker6 = new WorkerLocation(23.030231666666667, 113.08011166666667, Timestamp.valueOf(LocalDateTime.now())); // 最远点
 
+        List<WorkerLocation> workerLocations = new ArrayList<>();
+        workerLocations.add(worker1);
+        workerLocations.add(worker2);
+        workerLocations.add(worker3);
+        workerLocations.add(worker4);
+        workerLocations.add(worker5);
+        workerLocations.add(worker6);
         // 将数据存入 Redis，假设 ID 为 worker1 和 worker2
         return Mono.zip(
-//                reactiveRedisTemplate.opsForHash().put("worker:location", "611391076756933", worker1),
-//                reactiveRedisTemplate.opsForHash().put("worker:location", "611391076756933", worker2)
-                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", worker1),
-                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", worker2)
+                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", workerLocations),
+                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", workerLocations)
         ).then();
     }
 

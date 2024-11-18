@@ -1,0 +1,60 @@
+server:
+  port: 8769
+  ssl: #ssl配置
+    key-store: classpath:mykeystore.jks
+    key-store-type: jks
+    key-store-password: changeit
+#    key-password: 私钥密码
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+jwt:
+  public.key: classpath:app.pub
+
+
+
+
+
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://bs:bs@free.svipss.top:36155/bs
+    redis:
+      host: free.svipss.top
+      port: 32634
+      timeout: 60s
+      password: Ycs1363707959
+
+  application:
+    name: oauth2-resource-server-webflux
+  r2dbc:
+    url: r2dbc:mysql://free.svipss.top:10941/bx?serverTimezone=Asia/Shanghai
+    username: root
+    password: Ycs1363707959
+
+  #oauth2 配置
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # 公钥文件路径
+          public-key-location: classpath:app.pub
+
+          # 认证服务器提供的密钥验证路径，这种方式每次验证access_token都需要访问认证服务器
+
+#          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+
+
+# 小程序相关配置
+xcx:
+  account:
+    appId: wx360c292b9813f56e
+    appSecret: 388ccf427c4797b26e6e5f4919613cf5
+
+
+wx:
+  appid: wxbc7295dfee15bc75
+  secret: 54f93b04000bc604c0a9ed57515a9be2
