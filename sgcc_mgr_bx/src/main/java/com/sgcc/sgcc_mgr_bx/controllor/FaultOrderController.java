@@ -66,7 +66,6 @@ public class FaultOrderController {
         faultOrder.setLatitude(request.getLatitude());
         faultOrder.setId(YitIdHelper.nextId());
         faultOrder.setOpenid(authentication.getName());
-        faultOrder.setProcCode(0);
 
         // 处理故障订单的业务逻辑
         // ...
@@ -151,9 +150,7 @@ public class FaultOrderController {
                         // 在事务中同时执行保存评价和更新操作
                         return transactionalOperator.transactional(
                                 evaluationRepository.save(evaluation)
-                                        .then(databaseClient.sql("UPDATE fault_order SET proc_code = 7 WHERE id = ?")
-                                                .bind(0, orderId)
-                                                .then())
+                                                .then()
                         ).thenReturn(AjaxResponse.success("评价成功"));
                     } else {
                         return Mono.just(AjaxResponse.error("工单已评价或无权限评价该工单"));
@@ -184,7 +181,7 @@ public class FaultOrderController {
     @GetMapping("addressHistory/list")
     public Mono<AjaxResponse> getAddressHistoryList(Authentication authentication) {
         String openid = authentication.getName();
-        return faultOrderRepository.findByProcCodeAndOpenid(7, openid)
+        return faultOrderRepository.findByProcCodeAndOpenid(openid)
                 .collectList()  // 将 Flux 转换为 Mono<List<FaultOrder>>
                 .map(faultOrders -> {
                     if (faultOrders.isEmpty()) {
@@ -238,8 +235,8 @@ public class FaultOrderController {
         workerLocations.add(worker6);
         // 将数据存入 Redis，假设 ID 为 worker1 和 worker2
         return Mono.zip(
-                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", workerLocations),
-                reactiveRedisTemplate.opsForValue().set("worker:location:611391076756933", workerLocations)
+                reactiveRedisTemplate.opsForValue().set("worker:location:613847986142661", workerLocations),
+                reactiveRedisTemplate.opsForValue().set("worker:location:613847986142661", workerLocations)
         ).then();
     }
 

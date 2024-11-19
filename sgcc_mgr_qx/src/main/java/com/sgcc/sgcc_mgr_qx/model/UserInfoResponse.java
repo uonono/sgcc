@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class UserInfoResponse {
 
-    private String openid = "o7uzT6m8cMXwh03rQ0egT8-Snd9E";
+    private String phone = "13711065366";
     private String nickname = "灬辰";
     private int sex = 1;
     private String province;

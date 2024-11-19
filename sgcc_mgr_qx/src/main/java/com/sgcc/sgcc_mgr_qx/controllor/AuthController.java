@@ -53,7 +53,7 @@ public class AuthController {
      * 登录测试接口  传入为空
      * @return token加openid
      */
-    @PostMapping("/func/Common/loginByRider")
+    @PostMapping("/authLogin")
     public Mono<AjaxResponse> loginByRider() {
         // 调用内部方法获取 openid
         String openid = getOpenIdByCode("code");
