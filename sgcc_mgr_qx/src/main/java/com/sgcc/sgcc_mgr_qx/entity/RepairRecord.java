@@ -1,7 +1,8 @@
-package com.sgcc.sgcc_mgr_bx.entity;
+package com.sgcc.sgcc_mgr_qx.entity;
 
 import lombok.Data;
 import org.springframework.data.relational.core.mapping.Table;
+
 import java.sql.Timestamp;
 
 /**

@@ -19,11 +19,11 @@ public class IdGeneratorConfig {
     @PostConstruct
     public void init() {
         // 创建 IdGeneratorOptions 对象并进行配置
-        short machine = 55;
+        short machine = 1;
         IdGeneratorOptions options = new IdGeneratorOptions(machine);
         // 配置其他参数（如果需要）
         // options.WorkerIdBitLength = 10; // 默认6，最多支持64个节点
-        // options.SeqBitLength = 6; // 默认6，如果需要更多ID速度，可以增大
+         options.SeqBitLength = 11; // 默认6，如果需要更多ID速度，可以增大
         // options.BaseTime = Your_Base_Time; // 如果需要兼容老系统的BaseTime
         // 设置 ID 生成器
         YitIdHelper.setIdGenerator(options);

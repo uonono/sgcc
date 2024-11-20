@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 
 /**
 * @Author: cy
@@ -71,7 +72,7 @@ public class AuthController {
     private String getOpenIdByCode(String code) {
         // 模拟根据 code 返回 openid 的逻辑
 //        return code;
-        return "o7uzT6m8cMXwh03rQ0egT8-Snd9E";
+        return "13711065366";
     }
 
     // 创建 Basic Auth Header

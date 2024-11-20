@@ -3,6 +3,8 @@ package com.sgcc.sgcc_mgr_qx.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.ArrayList;
+
 /**
 * @Author: cy
 * @Date: 2024/11/18 09:22

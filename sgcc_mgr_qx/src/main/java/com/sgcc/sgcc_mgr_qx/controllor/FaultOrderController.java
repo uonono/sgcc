@@ -1,7 +1,9 @@
 package com.sgcc.sgcc_mgr_qx.controllor;
 
+import com.github.yitter.idgen.YitIdHelper;
 import com.sgcc.sgcc_mgr_qx.exception.AjaxResponse;
 import com.sgcc.sgcc_mgr_qx.repository.FaultOrderRepository;
+import com.sgcc.sgcc_mgr_qx.repository.RepairRecordRepository;
 import com.sgcc.sgcc_mgr_qx.service.FaultOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -16,6 +18,9 @@ public class FaultOrderController {
 
     @Autowired
     private FaultOrderRepository faultOrderRepository;
+
+    @Autowired
+    private RepairRecordRepository repairRecordRepository;
 
     @Autowired
     private DatabaseClient databaseClient;
@@ -57,4 +62,26 @@ public class FaultOrderController {
         });
     }
 
+    /**
+     * 接单接口
+     * @param authentication 当前用户认证信息
+     * @param orderId 工单ID
+     * @return 接单结果
+     */
+    @GetMapping("/accept/{orderId}")
+    public Mono<AjaxResponse> acceptOrder(Authentication authentication, @PathVariable Long orderId) {
+        String repairUserPhone = authentication.getName(); // 获取当前用户手机号
+        Long id = YitIdHelper.nextId();
+
+        return repairRecordRepository.existsByFaultOrderIdAndRepairUserPhone(orderId, repairUserPhone)
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.just(AjaxResponse.error("接单失败：您已接过此工单！"));
+                    }
+                    return repairRecordRepository
+                            .insertRepairRecord(id, orderId, repairUserPhone)
+                            .then(Mono.just(AjaxResponse.success("接单成功！")));
+                })
+                .onErrorResume(e -> Mono.just(AjaxResponse.error("接单失败：" + e.getMessage())));
+    }
 }
