@@ -2,10 +2,12 @@ package com.sgcc.sgcc_mgr_qx.repository;
 
 
 import com.sgcc.sgcc_mgr_qx.entity.RepairRecord;
+import com.sgcc.sgcc_mgr_qx.model.StatusModel;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface RepairRecordRepository extends ReactiveCrudRepository<RepairRecord, Long> {
@@ -17,8 +19,8 @@ public interface RepairRecordRepository extends ReactiveCrudRepository<RepairRec
      * @param repairUserPhone 维修用户手机号
      * @return 记录是否存在
      */
-    @Query("SELECT COUNT(*) FROM repair_record WHERE fault_order_id = :faultOrderId AND repair_user_phone = :repairUserPhone")
-    Mono<Boolean> existsByFaultOrderIdAndRepairUserPhone(@Param("faultOrderId") Long faultOrderId, @Param("repairUserPhone") String repairUserPhone);
+    @Query("SELECT COUNT(1) > 0 AS status FROM repair_record WHERE fault_order_id = :faultOrderId AND repair_user_phone = :repairUserPhone")
+    Mono<StatusModel> faultOrderIdAndRepairUserPhoneIsNull(@Param("faultOrderId") Long faultOrderId, @Param("repairUserPhone") String repairUserPhone);
 
 
     /**
@@ -34,4 +36,16 @@ public interface RepairRecordRepository extends ReactiveCrudRepository<RepairRec
     Mono<Integer> insertRepairRecord(@Param("id") Long id,
                                      @Param("faultOrderId") Long faultOrderId,
                                      @Param("repairUserPhone") String repairUserPhone);
+
+    /**
+     * 获取进行中的订单
+     * @param repairUserPhone 用户手机号
+     * @return
+     */
+    @Query("SELECT fr.* FROM fault_order fo " +
+            "JOIN repair_record rr ON fo.id = rr.fault_order_id " +
+            "WHERE rr.repair_user_phone = :repairUserPhone " +
+            "AND fo.status = '进行中'")
+    Flux<RepairRecord> findInProgressOrdersByPhone(@Param("repairUserPhone") String repairUserPhone);
+
 }

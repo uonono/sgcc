@@ -72,10 +72,10 @@ public class FaultOrderController {
     public Mono<AjaxResponse> acceptOrder(Authentication authentication, @PathVariable Long orderId) {
         String repairUserPhone = authentication.getName(); // 获取当前用户手机号
         Long id = YitIdHelper.nextId();
-
-        return repairRecordRepository.existsByFaultOrderIdAndRepairUserPhone(orderId, repairUserPhone)
+        //联合主键本身带检查，不知道这里查询是否多余（emm多余的是否影响性能）
+        return repairRecordRepository.faultOrderIdAndRepairUserPhoneIsNull(orderId, repairUserPhone)
                 .flatMap(exists -> {
-                    if (exists) {
+                    if (exists.isStatusOne()) {
                         return Mono.just(AjaxResponse.error("接单失败：您已接过此工单！"));
                     }
                     return repairRecordRepository
@@ -83,5 +83,24 @@ public class FaultOrderController {
                             .then(Mono.just(AjaxResponse.success("接单成功！")));
                 })
                 .onErrorResume(e -> Mono.just(AjaxResponse.error("接单失败：" + e.getMessage())));
+    }
+
+    /**
+     * 获取进行中的订单
+     * @param authentication 用户手机号
+     * @return 进行中的订单
+     */
+    @GetMapping("/inProgress")
+    public Mono<AjaxResponse> getInProgressOrders(Authentication authentication) {
+        String repairUserPhone = authentication.getName(); // 获取当前登录用户手机号
+        return repairRecordRepository.findInProgressOrdersByPhone(repairUserPhone)
+                .collectList()
+                .flatMap(inProgressOrders -> {
+                    if (inProgressOrders.isEmpty()) {
+                        return Mono.just(AjaxResponse.error("没有进行中的工单"));
+                    } else {
+                        return Mono.just(AjaxResponse.success(inProgressOrders));
+                    }
+                });
     }
 }
