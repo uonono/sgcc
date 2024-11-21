@@ -51,7 +51,7 @@ public class AjaxResponse {
         AjaxResponse resultBean = new AjaxResponse();
         resultBean.setIsok(false);
         resultBean.setCode(200);
-        resultBean.setMessage("error");
+        resultBean.setMessage("error:" + data);
         resultBean.setData(data);
         return resultBean;
     }
